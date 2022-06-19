@@ -1,0 +1,27 @@
+---
+- hosts: all
+  become: yes
+  user: root
+  gather_facts: yes
+  vars_files:
+    - ./ips.yml
+  tasks:
+    - name: inatall package
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update_cache: yes
+      with_items:
+        - resolvconf
+      become: yes
+
+    - name: add Shecan DNS IPs to resolvconf config files
+      shell: |
+        cat >> /etc/resolvconf/resolv.conf.d/head << EOF
+        nameserver {{ ip1 }}
+        nameserver {{ ip2 }}
+        EOF
+
+    - name: update resolv.conf file
+      shell: resolvconf -u
+
